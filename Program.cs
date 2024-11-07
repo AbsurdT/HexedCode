@@ -9,7 +9,9 @@ while (true)
     string hexedT3 = ((int)Math.Round(t3, MidpointRounding.AwayFromZero) + 75).ToString("X2");
     string hexedE1 = ((int)Math.Floor(e1 * 10) + 50).ToString("X2");
     Console.WriteLine("Полученный код:");
+    Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine($"{hexedE1}00{hexedT3}");
+    Console.ForegroundColor = ConsoleColor.Gray;
     Console.WriteLine("Нажмите любую кнопку для повторного ввода");
     Console.ReadKey();
     Console.Clear();
@@ -18,7 +20,7 @@ static double IsNumber()
 {
     while (true)
     {
-        bool isNumber = double.TryParse(Regex.Replace(Console.ReadLine(), @"[.]", ","), out double input);
+        bool isNumber = double.TryParse(Console.ReadLine().Replace('.', ','), out double input);
         if (isNumber) return input;
         Console.WriteLine("Попробуйте снова");
     }
