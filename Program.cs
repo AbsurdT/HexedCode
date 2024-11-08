@@ -18,10 +18,30 @@ while (true)
     Standarts standarts = await PrintStandarts();
     Console.WriteLine();
     Console.WriteLine("Введите время Response Time - T3:");
-    double deltaT3 = IsNumber() - standarts.T3;
+    double deltaT3;
+    while (true)
+    {
+        deltaT3 = IsNumber() - standarts.T3;
+        if (deltaT3 <=75 && deltaT3 >= -75)
+            break;
+        else
+        {
+            Console.WriteLine("Значение не попадает в диапазон [-75; 75], попробуйте снова");
+        }
+    }
     Console.WriteLine();
     Console.WriteLine("Введите объем E1 Fuel Percentage:");
-    double deltaE1 = IsNumber() - standarts.E1;
+    double deltaE1;
+    while (true)
+    {
+        deltaE1 = IsNumber() - standarts.E1;
+        if (deltaE1 <= 5.1 && deltaE1 >= -5.1)
+            break;
+        else
+        {
+            Console.WriteLine("Значение не попадает в диапазон [-5,10; 5,10], попробуйте снова");
+        }
+    }
     Console.WriteLine();
     string hexedT3 = ((int)Math.Round(deltaT3, MidpointRounding.AwayFromZero) + 75).ToString("X2");
     string hexedE1 = ((int)Math.Floor(deltaE1 * 10) + 50).ToString("X2");
