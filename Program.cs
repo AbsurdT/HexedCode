@@ -1,8 +1,17 @@
 ﻿using System.Text.Json;
 
-await PrintStandarts();
-Console.WriteLine("Изменить? да/нет");
-await ChangeIt(Console.ReadLine());
+if (!File.Exists("Standarts.json"))
+{
+    await ChangeIt("да");
+    await PrintStandarts();
+}
+else
+{
+    await PrintStandarts();
+    Console.WriteLine();
+    Console.WriteLine("Изменить? да/нет");
+    await ChangeIt(Console.ReadLine());
+}
 while (true)
 {
     Console.Clear();
@@ -53,7 +62,7 @@ static async Task ChangeIt(string yesOrNot)
 static async Task<Standarts> PrintStandarts()
 {
     string standartsData = await File.ReadAllTextAsync("Standarts.json");
-    Standarts standarts = JsonSerializer.Deserialize<Standarts>(standartsData);
+    Standarts? standarts = JsonSerializer.Deserialize<Standarts>(standartsData);
     Console.WriteLine("Текущие эталонные значения:");
     Console.WriteLine($"Время Т3 = {standarts.T3}");
     Console.WriteLine($"Объем Е1 = {standarts.E1}");
