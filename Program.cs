@@ -19,13 +19,7 @@ while (true)
     Console.WriteLine();
     Console.WriteLine("Введите время Response Time - T3:");
     // Получаем 8 точку
-    double deltaT3;
-    while (true)
-    {
-        deltaT3 = IsNumber() - standarts.T3;
-        if (IsInRange(deltaT3, -75, 75))
-            break;
-    }
+    double deltaT3 = CalculateResponseTime(standarts.T3);
     //
     Console.WriteLine();
     //  Получаем 10 точку, минимальный  и максимальные наливы
@@ -34,12 +28,13 @@ while (true)
     double volumeMin = result.min;
     double volumeMax = result.max;
     //
-    Console.WriteLine();
     // Считаем код 8 точки
     string hexedT3 = ((int)Math.Round(deltaT3, MidpointRounding.AwayFromZero) + 75).ToString("X2");
     //
-    // Считаем код 11 точки
+    // Считаем 11 точку
     var deltaE1 = rdc + (volumeMax - volumeMin) / 2000 * deltaT3 / standarts.DivConst * 100;
+    //
+    //  Считаем код 11 точки
     string hexedE1 = ((int)Math.Floor(deltaE1 * 10) + 50).ToString("X2");
     //
     Console.WriteLine("Полученный код:");
@@ -49,6 +44,15 @@ while (true)
     Console.ForegroundColor = ConsoleColor.Gray;
     Console.WriteLine("Нажмите любую кнопку для повторного ввода");
     Console.ReadKey();
+}
+static double CalculateResponseTime(double standart)
+{
+    while (true)
+    {
+        double deltaT3 = IsNumber() - standart;
+        if (IsInRange(deltaT3, -75, 75))
+            return deltaT3;
+    }
 }
 static (double volume, double min, double max) CalculateRDC(double standart)
 {
