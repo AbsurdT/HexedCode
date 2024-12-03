@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf;
+using System.Text.Json;
 
 if (!File.Exists("Standarts.json"))
 {
@@ -39,11 +42,70 @@ while (true)
     //
     Console.WriteLine("Полученный код:");
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"{hexedE1}00{hexedT3}");
+    string code = $"{hexedE1}00{hexedT3}";
+    Console.WriteLine(code);
     Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.Gray;
+    Task reWrite = Task.Run(() => PdfRewrite(code));
+    await reWrite;
     Console.WriteLine("Нажмите любую кнопку для повторного ввода");
     Console.ReadKey();
+}
+static void PdfRewrite(string textToWrite)
+{
+    // Путь к исходному и целевому PDF
+    string src = "file1.pdf";  // полный путь к файлу
+    string dest = "file2.pdf";  // путь для сохранения нового файла
+    string temp = "temp.pdf";
+
+    // Проверка существования файла
+    if (!File.Exists(src))
+    {
+        Console.WriteLine($"Файл {src} не найден.");
+        return;
+    }
+    // Открытие документа для редактирования
+    using (PdfReader reader = new PdfReader(src))
+    using (PdfWriter writer = new PdfWriter(temp))
+    {
+        // Открытие PDF для работы
+        PdfDocument pdfDoc = new PdfDocument(reader, writer);
+        PdfPage page = pdfDoc.GetPage(1);
+
+        // Получение PdfCanvas для рисования
+        var canvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
+
+        // Убираем старый текст, рисуя белый прямоугольник
+        canvas.SetFillColor(ColorConstants.WHITE);
+        canvas.Rectangle(100, 640, 200, 30); // Позиция текста
+        canvas.Fill();
+
+        // Добавляем новый текст
+
+
+        // Закрытие документа
+        pdfDoc.Close();
+    }
+    using (PdfReader reader = new PdfReader(temp))
+    using (PdfWriter writer = new PdfWriter(dest))
+    {
+        // Открытие PDF для работы
+        PdfDocument pdfDoc = new PdfDocument(reader, writer);
+        PdfPage page = pdfDoc.GetPage(1);
+
+        // Получение PdfCanvas для рисования
+        var canvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
+        var font = PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.HELVETICA);
+        canvas.BeginText()
+              .SetFontAndSize(font, 12)
+              .MoveText(100, 658) // Новая позиция для текста
+              .ShowText(textToWrite)
+              .EndText();
+
+        pdfDoc.Close();
+    }
+    File.Delete("temp.pdf");
+    Console.WriteLine("Редактирование завершено.");
 }
 static double CalculateResponseTime(double standart)
 {
