@@ -53,10 +53,25 @@ while (true)
 }
 static void PdfRewrite(string textToWrite)
 {
+    DateTime today = DateTime.Today;
     // Путь к исходному и целевому PDF
-    string src = "file1.pdf";  // полный путь к файлу
-    string dest = "file2.pdf";  // путь для сохранения нового файла
-    string temp = "temp.pdf";
+    var path = $@"C:\Program Files (x86)\Potok CR\report\UI\{today.Year.ToString()}\{today.Month.ToString("00")}\{today.Day.ToString("00")}";
+    if (!Directory.Exists(path))
+    {
+        Console.WriteLine("Редактирование не удалось");
+        return;
+    }
+    var fileName = GetFileName(path);
+    if (fileName == null) return;
+
+    string src = @$"{path}\{fileName}";  // полный путь к файлу
+
+    string newFolder = "Копии";
+    string outputFolderPath = System.IO.Path.Combine(
+       Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+       newFolder
+    );
+    string dest = Path.Combine(outputFolderPath,newFolder, fileName);  // путь для сохранения нового файла
 
     // Проверка существования файла
     if (!File.Exists(src))
@@ -65,28 +80,28 @@ static void PdfRewrite(string textToWrite)
         return;
     }
     // Открытие документа для редактирования
+    //using (PdfReader reader = new PdfReader(src))
+    //using (PdfWriter writer = new PdfWriter(temp))
+    //{
+    //    // Открытие PDF для работы
+    //    PdfDocument pdfDoc = new PdfDocument(reader, writer);
+    //    PdfPage page = pdfDoc.GetPage(1);
+
+    //    // Получение PdfCanvas для рисования
+    //    var canvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
+
+    //    // Убираем старый текст, рисуя белый прямоугольник
+    //    canvas.SetFillColor(ColorConstants.WHITE);
+    //    canvas.Rectangle(100, 640, 200, 30); // Позиция текста
+    //    canvas.Fill();
+
+    //    // Добавляем новый текст
+
+
+    //    // Закрытие документа
+    //    pdfDoc.Close();
+    //}
     using (PdfReader reader = new PdfReader(src))
-    using (PdfWriter writer = new PdfWriter(temp))
-    {
-        // Открытие PDF для работы
-        PdfDocument pdfDoc = new PdfDocument(reader, writer);
-        PdfPage page = pdfDoc.GetPage(1);
-
-        // Получение PdfCanvas для рисования
-        var canvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
-
-        // Убираем старый текст, рисуя белый прямоугольник
-        canvas.SetFillColor(ColorConstants.WHITE);
-        canvas.Rectangle(100, 640, 200, 30); // Позиция текста
-        canvas.Fill();
-
-        // Добавляем новый текст
-
-
-        // Закрытие документа
-        pdfDoc.Close();
-    }
-    using (PdfReader reader = new PdfReader(temp))
     using (PdfWriter writer = new PdfWriter(dest))
     {
         // Открытие PDF для работы
@@ -104,8 +119,44 @@ static void PdfRewrite(string textToWrite)
 
         pdfDoc.Close();
     }
-    File.Delete("temp.pdf");
     Console.WriteLine("Редактирование завершено.");
+}
+static void CreateOutputFolder(string path)
+{
+    if (!System.IO.Directory.Exists(path))
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(path);
+        }
+        catch (IOException ie)
+        {
+            Console.WriteLine("IO Error: " + ie.Message);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("General Error: " + e.Message);
+        }
+    }
+}
+static string GetFileName(string path)
+{
+
+    // Получаем все файлы в указанной директории
+    var files = new DirectoryInfo(path).GetFiles("*.pdf");
+
+    // Находим файл с самым поздним временем создания
+    var lastAddedFile = files.OrderByDescending(f => f.CreationTime).FirstOrDefault();
+
+    if (lastAddedFile != null)
+    {
+        return lastAddedFile.Name;
+    }
+    else
+    {
+        Console.WriteLine("В папке нет файлов.");
+        return null;
+    }
 }
 static double CalculateResponseTime(double standart)
 {
