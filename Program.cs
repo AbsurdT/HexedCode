@@ -217,14 +217,34 @@ static async Task ChangeIt(string yesOrNot)
             Volume = volume,
             DivConst = divConst
         };
-        string standartsData = JsonConvert.SerializeObject(standarts);
-        await File.WriteAllTextAsync("Standarts.json", standartsData);
+        try
+        {
+            string standartsData = JsonConvert.SerializeObject(standarts);
+            await File.WriteAllTextAsync("Standarts.json", standartsData);
+        }
+        catch(JsonException ex)
+        {
+            Console.WriteLine($"Serialize Error: {ex.Message}");
+        }
     }
 }
 static async Task<Standarts> PrintStandarts()
 {
     string standartsData = await File.ReadAllTextAsync("Standarts.json");
-    Standarts? standarts = JsonConvert.DeserializeObject<Standarts>(standartsData);
+    Standarts? standarts = null;
+    try
+    {
+        standarts = JsonConvert.DeserializeObject<Standarts>(standartsData);
+    }
+    catch (JsonException ex)
+    {
+        Console.WriteLine($"Deserialize Error: {ex.Message}");
+    }
+    if ( standarts == null)
+    {
+        Console.WriteLine("Не удалось десериализовать");
+        return null;
+    }
     Console.WriteLine("Текущие эталонные значения:");
     Console.WriteLine($"Время Т3 = {standarts.T3}");
     Console.WriteLine($"Объем Е1 = {standarts.Volume}");
