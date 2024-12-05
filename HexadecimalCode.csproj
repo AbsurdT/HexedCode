@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="itext.bouncy-castle-adapter" Version="9.0.0" />
     <PackageReference Include="itext7" Version="9.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

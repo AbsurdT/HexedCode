@@ -1,7 +1,6 @@
-﻿using iText.Kernel.Colors;
-using iText.Kernel.Font;
+﻿using iText.Kernel.Font;
 using iText.Kernel.Pdf;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 if (!File.Exists("Standarts.json"))
 {
@@ -218,14 +217,14 @@ static async Task ChangeIt(string yesOrNot)
             Volume = volume,
             DivConst = divConst
         };
-        string standartsData = JsonSerializer.Serialize(standarts);
+        string standartsData = JsonConvert.SerializeObject(standarts);
         await File.WriteAllTextAsync("Standarts.json", standartsData);
     }
 }
 static async Task<Standarts> PrintStandarts()
 {
     string standartsData = await File.ReadAllTextAsync("Standarts.json");
-    Standarts? standarts = JsonSerializer.Deserialize<Standarts>(standartsData);
+    Standarts? standarts = JsonConvert.DeserializeObject<Standarts>(standartsData);
     Console.WriteLine("Текущие эталонные значения:");
     Console.WriteLine($"Время Т3 = {standarts.T3}");
     Console.WriteLine($"Объем Е1 = {standarts.Volume}");
