@@ -35,127 +35,20 @@ while (true)
     //
     // Считаем 11 точку
     var deltaE1 = rdc + (volumeMax - volumeMin) / 2000 * deltaT3 / standarts.DivConst * 100;
-    //
-    //  Считаем код 11 точки
-    string hexedE1 = ((int)Math.Floor(deltaE1 * 10) + 50).ToString("X2");
-    //
-    Console.WriteLine("Полученный код:");
-    Console.ForegroundColor = ConsoleColor.Green;
-    string code = $"{hexedE1}00{hexedT3}";
-    Console.WriteLine(code);
+
+    if(IsInRange(Math.Round(deltaE1,2, MidpointRounding.AwayFromZero), -5.1, 5.1))
+    {
+        //  Считаем код 11 точки
+        string hexedE1 = ((int)Math.Floor(deltaE1 * 10) + 50).ToString("X2");
+        Console.WriteLine("Полученный код:");
+        Console.ForegroundColor = ConsoleColor.Green;
+        string code = $"{hexedE1}00{hexedT3}";
+        Console.WriteLine(code);
+        Console.ForegroundColor = ConsoleColor.Gray;
+    }
     Console.WriteLine();
-    Console.ForegroundColor = ConsoleColor.Gray;
-    Task reWrite = Task.Run(() => PdfRewrite(code));
-    await reWrite;
     Console.WriteLine("Нажмите любую кнопку для повторного ввода");
     Console.ReadKey();
-}
-static void PdfRewrite(string textToWrite)
-{
-    DateTime today = DateTime.Today;
-    // Путь к исходному и целевому PDF
-    var path = $@"C:\Program Files (x86)\Potok CR\report\UI\{today.Year.ToString()}\{today.Month.ToString("00")}\{today.Day.ToString("00")}";
-    if (!Directory.Exists(path))
-    {
-        Console.WriteLine("Редактирование не удалось");
-        return;
-    }
-    var fileName = GetFileName(path);
-    if (fileName == null) return;
-
-    string src = @$"{path}\{fileName}";  // полный путь к файлу
-
-    string newFolder = "Копии";
-    string outputFolderPath = System.IO.Path.Combine(
-       Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-       newFolder
-    );
-    string dest = Path.Combine(outputFolderPath,newFolder, fileName);  // путь для сохранения нового файла
-
-    // Проверка существования файла
-    if (!File.Exists(src))
-    {
-        Console.WriteLine($"Файл {src} не найден.");
-        return;
-    }
-    // Открытие документа для редактирования
-    //using (PdfReader reader = new PdfReader(src))
-    //using (PdfWriter writer = new PdfWriter(temp))
-    //{
-    //    // Открытие PDF для работы
-    //    PdfDocument pdfDoc = new PdfDocument(reader, writer);
-    //    PdfPage page = pdfDoc.GetPage(1);
-
-    //    // Получение PdfCanvas для рисования
-    //    var canvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
-
-    //    // Убираем старый текст, рисуя белый прямоугольник
-    //    canvas.SetFillColor(ColorConstants.WHITE);
-    //    canvas.Rectangle(100, 640, 200, 30); // Позиция текста
-    //    canvas.Fill();
-
-    //    // Добавляем новый текст
-
-
-    //    // Закрытие документа
-    //    pdfDoc.Close();
-    //}
-    using (PdfReader reader = new PdfReader(src))
-    using (PdfWriter writer = new PdfWriter(dest))
-    {
-        // Открытие PDF для работы
-        PdfDocument pdfDoc = new PdfDocument(reader, writer);
-        PdfPage page = pdfDoc.GetPage(1);
-
-        // Получение PdfCanvas для рисования
-        var canvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
-        var font = PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.HELVETICA);
-        canvas.BeginText()
-              .SetFontAndSize(font, 12)
-              .MoveText(100, 658) // Новая позиция для текста
-              .ShowText(textToWrite)
-              .EndText();
-
-        pdfDoc.Close();
-    }
-    Console.WriteLine("Редактирование завершено.");
-}
-static void CreateOutputFolder(string path)
-{
-    if (!System.IO.Directory.Exists(path))
-    {
-        try
-        {
-            System.IO.Directory.CreateDirectory(path);
-        }
-        catch (IOException ie)
-        {
-            Console.WriteLine("IO Error: " + ie.Message);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("General Error: " + e.Message);
-        }
-    }
-}
-static string GetFileName(string path)
-{
-
-    // Получаем все файлы в указанной директории
-    var files = new DirectoryInfo(path).GetFiles("*.pdf");
-
-    // Находим файл с самым поздним временем создания
-    var lastAddedFile = files.OrderByDescending(f => f.CreationTime).FirstOrDefault();
-
-    if (lastAddedFile != null)
-    {
-        return lastAddedFile.Name;
-    }
-    else
-    {
-        Console.WriteLine("В папке нет файлов.");
-        return null;
-    }
 }
 static double CalculateResponseTime(double standart)
 {
@@ -226,9 +119,13 @@ static async Task ChangeIt(string yesOrNot)
         {
             Console.WriteLine($"Serialize Error: {ex.Message}");
         }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Unknown Exception: {ex.Message}");
+        }
     }
 }
-static async Task<Standarts> PrintStandarts()
+static async Task<Standarts?> PrintStandarts()
 {
     string standartsData = await File.ReadAllTextAsync("Standarts.json");
     Standarts? standarts = null;
